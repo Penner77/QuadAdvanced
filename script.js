@@ -65,27 +65,32 @@ function getHalf(number) {
 }
 
 
-// --- Helper Function: Calculate Sum of Last 4 Quadrants (Equivalent to E3 logic) ---
+// --- Helper Function: Calculate Sum of Last 4 Quadrants (Modified to include 0/00) ---
 function calculateSumLast4Quads(historyArray) {
-    const last4Spins = historyArray.slice(-4); // Get the last up to 4 entries
-    if (last4Spins.length < 4) return null; // Only calculate if there are at least 4 spins
+    // Need at least 4 total spins to attempt a sum of the last 4
+    if (historyArray.length < 4) return null;
 
-    let sum = 0;
-    let count = 0; // Count how many had a valid quadrant (1-4)
+    const last4Spins = historyArray.slice(-4); // Get the last 4 total entries
+    let sum = 0;
 
-    for (const spin of last4Spins) {
-        const quad = getQuadrant(spin);
-        // Only sum quadrants 1-4, ignore 0, 00, or null
-        if (typeof quad === 'number' && quad >= 1 && quad <= 4) {
-            sum += quad;
-            count++;
-        } else {
-            // If any of the last 4 do not have a valid quadrant (1-4), we cannot form a sum of 4 quads
-            return null; // Cannot calculate sum of 4 quads
-        }
-    }
-     // We should only get here if all 4 spins had valid quads (1-4)
-    return sum;
+    // Iterate through the last 4 spins
+    for (const spin of last4Spins) {
+        const quad = getQuadrant(spin); // Get the quadrant (0, "00", 1, 2, 3, 4, or null)
+
+        // Sum quadrants 1-4 directly
+        if (typeof quad === 'number' && quad >= 1 && quad <= 4) {
+            sum += quad;
+        } else if (quad === 0) {
+            // If the spin was 0, treat its contribution to the sum as 0
+            sum += 0;
+        }
+        // If the spin was "00" or invalid input (resulting in quad "00" or null), it is skipped from the sum.
+        // This treats "00" differently than 0 for the sum calculation, as "00" doesn't map easily to a numerical quadrant value.
+    }
+
+    // Always return a sum based on the last 4 spins if history has at least 4 entries.
+    // The sum will reflect contributions from 1-4 quads and 0 quads.
+    return sum;
 }
 
 // --- Helper Function: Calculate Avg of Last 10 Raw (Equivalent to E4 logic) ---
