@@ -229,7 +229,7 @@ function getSuggestion(e3Class, e4Class) {
     // Case 10: Conflict (High E3 vs Low E4)
     // Quadrant concentration high, but overall numbers low. Strong internal conflict.
     if ((e3Class === "E3_High" || e3Class === "E3_MidHigh") && (e4Class === "E4_Low" || e4Class === "E4_MidLow")) {
-         return "Conflict: High Quads vs Low Avg. Indicators oppose. Focus boundary zones: Q2/Q3 border (18/19), Q1/Q4 border (9/28). Consider Splits bridging halves/quads or 7-30.";
+	return "Conflict: High Quads vs Low Avg. Indicators oppose. Focus boundary zones: Q2/Q3 border (18/19), Q1/Q4 border (9/28). Consider Splits bridging halves/quads or 7-30.";
     }
 
     // Case 11: Conflict (Low E3 vs High E4)
