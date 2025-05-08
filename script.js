@@ -183,13 +183,13 @@ function getSuggestion(e3Class, e4Class) {
     // Case 3: Strong Below Balance
     // Indicators are significantly below balance, but not extreme. Focus on lower halves/quadrants.
     if ((e3Class === "E3_Low" || e3Class === "E3_MidLow") && (e4Class === "E4_Low" || e4Class === "E4_MidLow")) {
-        return "Strong Suggest: Low Halves (1-18). Strong Likeliness for Q1/Q2 activity. Consider betting on Dozen 1 or lower half of Dozen 2.";
+        return "Strong Suggest: Low Halves (1-18). Strong Likeliness for Q1/Q2 activity. BEST Doz 1 & Doz 2";
     }
 
     // Case 4: Strong Above Balance
     // Indicators are significantly above balance, but not extreme. Focus on higher halves/quadrants.
     if ((e3Class === "E3_High" || e3Class === "E3_MidHigh") && (e4Class === "E4_High" || e4Class === "E4_MidHigh")) {
-         return "Strong Suggest: High Halves (19-36). Strong Likeliness for Q3/Q4 activity. Consider betting on Dozen 3 or upper half of Dozen 2.";
+         return "Strong Suggest: High (19-36). Strong Likeliness for Q3/Q4. Consider Dozen 3 or upper half of Dozen 2.";
     }
 
     // Case 5: Very Near Balance (The Peak of the 4x4x4x4 Sum Distribution)
@@ -223,13 +223,13 @@ function getSuggestion(e3Class, e4Class) {
     // Case 9: Leaning Low (E3 Near/Avg, E4 Low)
     // Sum of Quads is central, Avg is low. Stronger overall low bias.
     if ((e3Class === "E3_Medium" || e3Class === "E3_MidHigh") && (e4Class === "E4_Low" || e4Class === "E4_MidLow")) {
-        return "Leaning Suggest: Low Halves (1-18). Likeliness leans towards Q1/Q2 activity. Consider betting Dozen 1.";
+        return "Leaning Suggest: Low Halves (1-18). Likeliness leans towards Q1/Q2 activity. Consider betting 1st Dozen.";
     }
 
     // Case 10: Conflict (High E3 vs Low E4)
     // Quadrant concentration high, but overall numbers low. Strong internal conflict.
     if ((e3Class === "E3_High" || e3Class === "E3_MidHigh") && (e4Class === "E4_Low" || e4Class === "E4_MidLow")) {
-         return "Conflict: High Quads vs Low Avg. Indicators oppose. Focus boundary zones: Q2/Q3 border (18/19), Q1/Q4 border (9/28). Consider Splits bridging halves/quads.";
+         return "Conflict: High Quads vs Low Avg. Indicators oppose. Focus boundary zones: Q2/Q3 border (18/19), Q1/Q4 border (9/28). Consider Splits bridging halves/quads or "7-30".";
     }
 
     // Case 11: Conflict (Low E3 vs High E4)
@@ -245,7 +245,7 @@ function getSuggestion(e3Class, e4Class) {
     // Case 12: Pattern Breakdown / Zero Edge Signal (Default if none above match)
     // This covers remaining combinations and implies a state where the indicators don't fit
     // defined patterns. This is where the base 4 '2' signal might be strongest.
-    return "Pattern Breakdown: Indicators Muddled. Zero Edge Signal ACTIVE. BET Doz 2/Doz 2 - 90% majority here.";
+    return "Pattern Breakdown: Muddled. ZERO Signal ACTIVE. Consider Doz 1/Doz 2 - 90% majority here";
 
     // Optional: Add the Zero Edge Signal Trigger - This logic needs to go *before* returning the default suggestion
     // We can add a dedicated output for this Zero Signal Status separately in the display,
@@ -411,13 +411,24 @@ function updateAnalysisDisplay() {
     const avg10 = calculateAvgLast10Raw(spinHistory);
     avg10Output.textContent = avg10 !== null ? avg10.toFixed(2) : "N/A (<10 numbers)"; // Display Avg of 10 (formatted)
 
-    // Classify indicators
-    const e3Class = classifyE3(sum4);
-    const e4Class = classifyE4(avg10);
+// --- Determine Suggestion ---
+    let finalSuggestion = ""; // Variable to hold the suggestion text
 
-    // Get Suggestion (H1)
-    const suggestion = getSuggestion(e3Class, e4Class);
-    suggestionOutput.textContent = suggestion;
+    // Check for the "Potential Correct Imminent" condition first (Sum > 11 and Avg >= 20)
+    if (sum4 !== null && avg10 !== null && sum4 > 11 && avg10 >= 20) {
+        finalSuggestion = "Potential Correct Imminent: Sum > 11, Avg >= 20. Focus High Regions!";
+    } else {
+        // If the imminent condition is not met, proceed with standard suggestion logic
+        // Classify indicators
+        const e3Class = classifyE3(sum4);
+        const e4Class = classifyE4(avg10);
+
+        // Get Suggestion based on classifications
+        finalSuggestion = getSuggestion(e3Class, e4Class);
+    }
+
+    // Display the determined suggestion
+    suggestionOutput.textContent = finalSuggestion; // <--- Now uses finalSuggestion variable
 
 // Check if the suggestion contains specific phrases related to Dozen 2 (case-insensitive)
     const lowerCaseSuggestion = suggestion.toLowerCase();
