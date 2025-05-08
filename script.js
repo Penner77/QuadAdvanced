@@ -431,7 +431,7 @@ function updateAnalysisDisplay() {
     suggestionOutput.textContent = finalSuggestion; // <--- Now uses finalSuggestion variable
 
 // Check if the suggestion contains specific phrases related to Dozen 2 (case-insensitive)
-    const lowerCaseSuggestion = suggestion.toLowerCase();
+    const lowerCaseSuggestion = finalSuggestion.toLowerCase();
     if (lowerCaseSuggestion.includes("upper half of dozen 2") || lowerCaseSuggestion.includes("dozen 2")) {
         suggestionOutput.textContent += " BET w/+ Doz 2 HERE";
     }
