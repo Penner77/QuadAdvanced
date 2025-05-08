@@ -161,7 +161,7 @@ function getSuggestion(e3Class, e4Class) {
      // **REMOVED specific "Needs data" message**
      if (e3Class === "" || e4Class === "") {
          // Display this message if there isn't enough history yet for classification
-         return "Analyzing Pattern... Need 4+ Quads & 10+ Numbers..."; // Or "" if preferred
+        return "Analyzing Pattern... Need 4+ Quads & 10+ Numbers..."; // Or "" if preferred
      }
 
 
@@ -189,7 +189,7 @@ function getSuggestion(e3Class, e4Class) {
     // Case 4: Strong Above Balance
     // Indicators are significantly above balance, but not extreme. Focus on higher halves/quadrants.
     if ((e3Class === "E3_High" || e3Class === "E3_MidHigh") && (e4Class === "E4_High" || e4Class === "E4_MidHigh")) {
-         return "Strong Suggest: High (19-36). Strong Likeliness for Q3/Q4. Consider Dozen 3 or upper half of Dozen 2.";
+        return "Strong Suggest: High (19-36). Strong Likeliness for Q3/Q4. Consider Dozen 3 or upper half of Dozen 2.";
     }
 
     // Case 5: Very Near Balance (The Peak of the 4x4x4x4 Sum Distribution)
@@ -229,23 +229,23 @@ function getSuggestion(e3Class, e4Class) {
     // Case 10: Conflict (High E3 vs Low E4)
     // Quadrant concentration high, but overall numbers low. Strong internal conflict.
     if ((e3Class === "E3_High" || e3Class === "E3_MidHigh") && (e4Class === "E4_Low" || e4Class === "E4_MidLow")) {
-	return "Conflict: High Quads vs Low Avg. Indicators oppose. Focus boundary zones: Q2/Q3 border (18/19), Q1/Q4 border (9/28). Consider Splits bridging halves/quads or 7-30.";
+        return "Conflict: High Quads vs Low Avg. Indicators oppose. Focus boundary zones: Q2/Q3 border (18/19), Q1/Q4 border (9/28). Consider Splits bridging halves/quads or 7-30.";
     }
 
     // Case 11: Conflict (Low E3 vs High E4)
     // Quadrant concentration low, but overall numbers high. Strong internal conflict.
     if ((e3Class === "E3_Low" || e3Class === "E3_MidLow") && (e4Class === "E4_High" || e4Class === "E4_High")) {
-         return "Conflict: Low Quads vs High Avg. Indicators oppose. Focus boundary zones: Q2/Q3 border (18/19), Q1/Q4 border (9/28). Consider Splits bridging halves/quads.";
+        return "Conflict: Low Quads vs High Avg. Indicators oppose. Focus boundary zones: Q2/Q3 border (18/19), Q1/Q4 border (9/28). Consider Splits bridging halves/quads.";
     }
      if ((e3Class === "E3_Low" || e3Class === "E3_MidLow") && (e4Class === "E4_MidHigh")) { // Added MidHigh check
-         return "Conflict: Low Quads vs High Avg. Indicators oppose. Focus boundary zones: Q2/Q3 border (18/19), Q1/Q4 border (9/28). Consider Splits bridging halves/quads.";
+        return "Conflict: Low Quads vs High Avg. Indicators oppose. Focus boundary zones: Q2/Q3 border (18/19), Q1/Q4 border (9/28). Consider Splits bridging halves/quads.";
     }
 
 
     // Case 12: Pattern Breakdown / Zero Edge Signal (Default if none above match)
     // This covers remaining combinations and implies a state where the indicators don't fit
     // defined patterns. This is where the base 4 '2' signal might be strongest.
-    return "Pattern Breakdown: Muddled. ZERO Signal ACTIVE. Consider Doz 1/Doz 2 - 90% majority here";
+        return "Pattern Breakdown: Muddled. ZERO Signal ACTIVE. Consider Doz 1/Doz 2 - 90% majority here";
 
     // Optional: Add the Zero Edge Signal Trigger - This logic needs to go *before* returning the default suggestion
     // We can add a dedicated output for this Zero Signal Status separately in the display,
@@ -267,7 +267,7 @@ function getSurroundingNumbersString(spinResult) {
 
     // Check if input is valid (a number or "00")
      if (isNaN(numberToMatch) && numberToMatch !== "00" && numberToMatch !== 0) {
-         return "Error: Invalid input type"; // Or handle this error elsewhere
+        return "Error: Invalid input type"; // Or handle this error elsewhere
      }
 
     try {
