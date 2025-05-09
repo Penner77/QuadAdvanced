@@ -130,7 +130,7 @@ h1, h2, h3 {
      border: 1px solid #ddd; /* Border around the output */
      border-radius: 3px;
      background-color: #fafafa; /* Very light background */
-     white-space: pre-wrap; /* <-- CHANGED to preserve newlines and wrap text */
+     white-space: pre-wrap; /* CHANGED to preserve newlines and wrap text */
      word-break: break-word; /* Break long strings if necessary */
      color: #333; /* Darker text for readability */
 }
