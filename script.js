@@ -23,6 +23,7 @@ const sum4Output = document.getElementById('sum4Output');
 const avg10Output = document.getElementById('avg10Output');
 const suggestionOutput = document.getElementById('suggestionOutput');
 const surroundingNumbersOutput = document.getElementById('surroundingNumbersOutput');
+const cornerBetsOutput = document.getElementById('cornerBetsOutput'); // Get reference to the new element
 const last10SpinsList = document.getElementById('last10SpinsList');
 const last10QuadrantsList = document.getElementById('last10QuadrantsList');
 const last10HalvesList = document.getElementById('last10HalvesList');
@@ -323,6 +324,103 @@ function getSurroundingNumbersString(spinResult) {
     }
 }
 
+// --- Helper Function: Parse Surrounding Numbers String into a List ---
+function parseSurroundingNumbersString(surroundingString) {
+    if (!surroundingString || surroundingString.includes("Error")) {
+        return []; // Return empty array if string is empty or an error message
+    }
+
+    const parts = surroundingString.split(" --- ");
+    if (parts.length !== 2) {
+        // console.error("Unexpected surrounding string format:", surroundingString); // Optional logging
+        return []; // Unexpected format
+    }
+
+    const allNumbers = [];
+
+    parts.forEach(part => {
+        // Remove leading/trailing '|' and spaces, then split by '|'
+        const numberStrings = part.replace(/^\|\s*|\s*\|$/g, '').split('|');
+
+        numberStrings.forEach(numStr => {
+            const trimmedNumStr = numStr.trim();
+            if (trimmedNumStr === "") return; // Skip empty strings from split
+
+            if (trimmedNumStr === "00") {
+                allNumbers.push("00"); // Keep "00" as string
+            } else {
+                const num = parseFloat(trimmedNumStr);
+                if (!isNaN(num) && Number.isInteger(num) && num >= 0 && num <= 36) { // Add validation
+                    allNumbers.push(num); // Add valid numbers (0-36)
+                }
+                // Invalid strings are skipped
+            }
+        });
+    });
+
+    return allNumbers; // Return array like [32, 15, 3, ..., "00", ..., 24]
+}
+
+// --- Helper Function: Find Corner Bets in a List of Numbers ---
+function findCornerBetsInSurrounding(numbersList) {
+    // Define all standard 4-number corner bets on American Roulette felt layout
+    // These are numbers that meet at a single intersection point on the grid.
+    const allCornerBets = [
+        [1, 2, 4, 5], [2, 3, 5, 6], [4, 5, 7, 8], [5, 6, 8, 9],
+        [7, 8, 10, 11], [8, 9, 11, 12], [10, 11, 13, 14], [11, 12, 14, 15],
+        [13, 14, 16, 17], [14, 15, 17, 18], [16, 17, 19, 20], [17, 18, 20, 21],
+        [19, 20, 22, 23], [20, 21, 23, 24], [22, 23, 25, 26], [23, 24, 26, 27],
+        [25, 26, 28, 29], [26, 27, 29, 30], [28, 29, 31, 32], [29, 30, 32, 33],
+        [31, 32, 34, 35], [32, 33, 35, 36],
+        // Standard 4-number corner involving 0 and 00 (geometrically a square on the felt)
+        [0, "00", 2, 3] // Numbers as they appear in wheelData / history
+    ];
+
+    const fullCornersFound = [];
+    const partialCornersFound = []; // Store partial corners as objects { corner: [...], found: [...] }
+
+    // Convert the input list of numbers to strings for easier comparison with "00"
+    const numbersListStrings = numbersList.map(String);
+
+    // Check each defined standard corner bet
+    for (const corner of allCornerBets) {
+        let foundCount = 0;
+        const foundNumbersInThisCorner = [];
+
+        // Convert corner numbers to strings for comparison
+        const cornerStrings = corner.map(String);
+
+        // Check how many numbers of the current corner bet are in the input list
+        for (const cornerNumStr of cornerStrings) {
+            if (numbersListStrings.includes(cornerNumStr)) {
+                foundCount++;
+                // Find the original number/string from the input list to add to 'found' list
+                const originalFound = numbersList.find(num => String(num) === cornerNumStr);
+                 if (originalFound !== undefined) {
+                     foundNumbersInThisCorner.push(originalFound);
+                 }
+            }
+        }
+
+        if (foundCount === 4) {
+            // Found all 4 numbers of this corner bet in the list
+            fullCornersFound.push(corner); // Add the original corner bet array to full list
+        } else if (foundCount === 3) {
+            // Found exactly 3 out of 4 numbers
+            // Store the original corner bet numbers AND the numbers from the list that were found
+            partialCornersFound.push({
+                corner: corner, // The definition of the full corner bet
+                found: foundNumbersInThisCorner // The 3 numbers found from the list
+            });
+        }
+    }
+
+    return {
+        full: fullCornersFound,
+        partial: partialCornersFound
+    };
+}
+
 
 // --- Main Update Function ---
 // This function is called when the Add Spin button is clicked
@@ -337,6 +435,7 @@ function updateAnalysisDisplay() {
         avg10Output.textContent = "";
         suggestionOutput.textContent = "";
         surroundingNumbersOutput.textContent = "";
+        cornerBetsOutput.textContent = ""; // Clear new output too
         lastSpinQuadrantOutput.textContent = "";
         lastSpinHalfOutput.textContent = "";
         last10SpinsList.textContent = ""; // Clear history display
@@ -360,6 +459,7 @@ function updateAnalysisDisplay() {
              avg10Output.textContent = "";
              suggestionOutput.textContent = "";
              surroundingNumbersOutput.textContent = "";
+             cornerBetsOutput.textContent = ""; // Clear new output too
              lastSpinQuadrantOutput.textContent = "";
              lastSpinHalfOutput.textContent = "";
              last10SpinsList.textContent = ""; // Clear history display
@@ -390,6 +490,7 @@ function updateAnalysisDisplay() {
         avg10Output.textContent = "";
         suggestionOutput.textContent = "";
         surroundingNumbersOutput.textContent = "";
+        cornerBetsOutput.textContent = ""; // Clear new output too
         lastSpinQuadrantOutput.textContent = "";
         lastSpinHalfOutput.textContent = "";
         last10SpinsList.textContent = "";
@@ -415,18 +516,21 @@ function updateAnalysisDisplay() {
     const avg10 = calculateAvgLast10Raw(spinHistory);
     avg10Output.textContent = avg10 !== null ? avg10.toFixed(2) : "N/A (<10 numbers)"; // Display Avg of 10 (formatted)
 
+
+    // Classify indicators (Needed for getSuggestion and new Heads-up logic)
+    const e3Class = classifyE3(sum4);
+    const e4Class = classifyE4(avg10);
+
+
 // --- Determine Suggestion ---
     let finalSuggestion = ""; // Variable to hold the suggestion text
 
     // Check for the "Potential Correct Imminent" condition first (Sum > 11 and Avg >= 20)
+    // Note: This logic was based on a previous request and can be modified based on your clarified needs.
     if (sum4 !== null && avg10 !== null && sum4 > 11 && avg10 >= 20) {
         finalSuggestion = "Potential Correct Imminent: Sum > 11, Avg >= 20. Focus High Regions!";
     } else {
         // If the imminent condition is not met, proceed with standard suggestion logic
-        // Classify indicators
-        const e3Class = classifyE3(sum4);
-        const e4Class = classifyE4(avg10);
-
         // Get Suggestion based on classifications
         finalSuggestion = getSuggestion(e3Class, e4Class);
     }
@@ -434,13 +538,15 @@ function updateAnalysisDisplay() {
     // Display the determined suggestion
     suggestionOutput.textContent = finalSuggestion; // <--- Now uses finalSuggestion variable
 
-// Check if the suggestion contains specific phrases related to Dozen 2 (case-insensitive)
+    // Append additional messages based on conditions (from previous steps and new requests)
+
+    // Append: BET w/+ Doz 2 HERE (from Step 2)
     const lowerCaseSuggestion = finalSuggestion.toLowerCase();
     if (lowerCaseSuggestion.includes("upper half of dozen 2") || lowerCaseSuggestion.includes("dozen 2")) {
         suggestionOutput.textContent += " BET w/+ Doz 2 HERE";
     }
 
-// Check for High/Q3/Q4 suggestion combined with Sum of 4 >= 12
+    // Append: SPLIT BET 1st Doz/3rd Doz HERE (from Step 3)
     if (sum4 !== null && sum4 >= 12 &&
         (lowerCaseSuggestion.includes("high") ||
          lowerCaseSuggestion.includes("q3") ||
@@ -450,12 +556,12 @@ function updateAnalysisDisplay() {
          suggestionOutput.textContent += " SPLIT BET 1st Doz/3rd Doz HERE";
     }
 
-// Check for the specific 17-20 split suggestion (flexible match)
+    // Append: THIS MEANS 7-30 (from Step 4)
     if (lowerCaseSuggestion.includes("mid quadrants 2 & 3") && lowerCaseSuggestion.includes("17-20")) {
         suggestionOutput.textContent += " THIS MEANS 7-30";
     }
 
-// Check if Sum of Last 4 Quadrants is exactly 10
+    // Append: !SUM Balanced! (from Step 5)
     if (sum4 !== null && sum4 === 10) {
         suggestionOutput.textContent += " !SUM Balanced!";
     }
@@ -464,6 +570,41 @@ function updateAnalysisDisplay() {
     // --- Get & Display Surrounding Numbers for the LAST spin ---
      const surroundingString = getSurroundingNumbersString(lastSpinFromHistory);
      surroundingNumbersOutput.textContent = surroundingString;
+
+    // --- Find & Display Possible Corner Bets in Surrounding Numbers ---
+    const surroundingNumbersList = parseSurroundingNumbersString(surroundingString);
+    const cornerBetsFound = findCornerBetsInSurrounding(surroundingNumbersList);
+
+    let cornerBetsOutputText = "";
+    const fullCorners = cornerBetsFound.full;
+    const partialCorners = cornerBetsFound.partial;
+
+    if (fullCorners.length > 0) {
+        // Format Full Corners: (n1, n2, n3, n4) on separate lines
+        cornerBetsOutputText += "Full Corner Bets:\n"; // Add heading and newline
+        cornerBetsOutputText += fullCorners.map(c => `(${c.join(',')})`).join('\n'); // Join with newline
+    }
+
+    if (partialCorners.length > 0) {
+        // Add separator and heading if there were full corners
+        if (fullCorners.length > 0) {
+            cornerBetsOutputText += "\n---\n"; // Add newline separator
+        }
+        // Format Partial Corners: just list the 3 found numbers on separate lines
+        cornerBetsOutputText += "Partial Corner Bets (3 of 4 found):\n"; // Add heading and newline
+        cornerBetsOutputText += partialCorners.map(p => {
+             // Format found numbers nicely, ensure 00 is correct
+            const foundNumsFormatted = p.found.map(num => typeof num === 'string' ? `"${num}"` : String(num));
+            return `(${foundNumsFormatted.join(',')})`; // Only show the found numbers in parentheses
+        }).join('\n'); // Join with newline
+    }
+
+    // Default message if no corners were found
+    if (fullCorners.length === 0 && partialCorners.length === 0) {
+        cornerBetsOutputText = "No standard corner bets found in surrounding numbers.";
+    }
+    cornerBetsOutput.textContent = cornerBetsOutputText;
+
 
      // --- Display History Lists ---
      // Get the last 10 spins (or fewer)
@@ -541,6 +682,7 @@ clearHistoryButton.addEventListener('click', () => {
     avg10Output.textContent = "";
     suggestionOutput.textContent = "";
     surroundingNumbersOutput.textContent = "";
+    cornerBetsOutput.textContent = ""; // Clear new output too
     lastSpinQuadrantOutput.textContent = "";
     lastSpinHalfOutput.textContent = "";
     last10SpinsList.textContent = "";
